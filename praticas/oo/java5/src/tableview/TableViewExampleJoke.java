@@ -35,15 +35,6 @@ import javax.script.ScriptException;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 
-
-//  Mostra piadas do Chuck Norris em TableView, usando a API deste site:
-//  https://api.chucknorris.io/
-//  Exemplifica também:
-//    - CellFactory customizada para quebra de linha na segunda coluna
-//    - Dialogs em JavaFX (ver mais em: http://code.makery.ch/blog/javafx-dialogs-official/)
-//    - Uso de HttpURLConnection para comunicação com servidor web
-//    - Uso de ScriptEngine para tratar JSON retornado pelo servidor web
-//    - Bug na customização da quebra de linha :-) (primeira linha adicionada não se ajusta)
   
 public class TableViewExampleJoke extends Application {
   
@@ -63,14 +54,17 @@ public class TableViewExampleJoke extends Application {
     
     Scene scene = new Scene(new Group());
     
-    final Label label = new Label("TableView Example: Chuck Norris Jokes");
+    final Label label = new Label("Gerador de Insultos");
     label.setFont(new Font("Arial", 20));
     
-    TableColumn<TableData,String> fstCol = new TableColumn<TableData,String>("Id");
-    fstCol.setCellValueFactory(cellData -> cellData.getValue().idProperty());
+    TableColumn<TableData,String> fstCol = new TableColumn<TableData,String>("Number");
+    fstCol.setCellValueFactory(cellData -> cellData.getValue().numberProperty());
     
-    TableColumn<TableData,String> sndCol = new TableColumn<TableData,String>("Joke");
-    sndCol.setCellValueFactory(cellData -> cellData.getValue().jokeProperty());
+    TableColumn<TableData,String> sndCol = new TableColumn<TableData,String>("Insult");
+    sndCol.setCellValueFactory(cellData -> cellData.getValue().insultProperty());
+    
+    TableColumn<TableData,String> trdCol = new TableColumn<TableData,String>("Shown");
+    trdCol.setCellValueFactory(cellData -> cellData.getValue().shownProperty());
     
     sndCol.setCellFactory(column -> {
       return new TableCell<TableData, String>() {
@@ -97,16 +91,17 @@ public class TableViewExampleJoke extends Application {
     table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     table.getColumns().add(fstCol);
     table.getColumns().add(sndCol);
+    table.getColumns().add(trdCol);
 
     table.setItems(data);
     
-    Button btn = new Button("Add a joke");
+    Button btn = new Button("Add a Insult");
     
     btn.setOnAction(new EventHandler<ActionEvent>() {
       public void handle(ActionEvent event) {
         Map json = null;
         try {
-          json = http.sendGet("https://api.chucknorris.io/jokes/random");
+          json = http.sendGet("https://evilinsult.com/generate_insult.php?lang=en&type=json");
         } catch (Exception e) {
           Alert alert = new Alert(AlertType.WARNING);
           alert.setTitle("Warning");
@@ -115,7 +110,7 @@ public class TableViewExampleJoke extends Application {
           alert.showAndWait();
         }
         if (json != null)
-          data.add(new TableData((String)json.get("id"), (String)json.get("value")));
+          data.add(new TableData((String)json.get("number"), (String)json.get("insult"), (String)json.get("shown")));
       }
     });
     
@@ -133,30 +128,45 @@ public class TableViewExampleJoke extends Application {
   }
   
   public class TableData {
-    private final SimpleStringProperty id;
-    private final SimpleStringProperty joke;
+    private final SimpleStringProperty number;
+    private final SimpleStringProperty insult;
+    private final SimpleStringProperty shown;
     
-    private TableData(String id, String jk) {
-      this.id = new SimpleStringProperty(id);
-      this.joke = new SimpleStringProperty(jk);
+    private TableData(String number, String insult, String shown) {
+      this.number = new SimpleStringProperty(number);
+      this.insult = new SimpleStringProperty(insult);
+      this.shown = new SimpleStringProperty(shown);
     }
-    public SimpleStringProperty idProperty() {
-      return id;
+    
+    public SimpleStringProperty shownProperty() {
+      return shown;
     }
-    public String getId() {
-      return id.get();
+    
+    public String getShown() {
+      return shown.get();
     }
-    public void setId(String id) {
-      this.id.set(id);
+    
+    public void setShown(String shown) {
+      this.shown.set(shown);
     }
-    public SimpleStringProperty jokeProperty() {
-      return joke;
+    
+    public SimpleStringProperty numberProperty() {
+      return number;
     }
-    public String getJoke() {
-      return joke.get();
+    public String getNumber() {
+      return number.get();
     }
-    public void setJoke(String jk) {
-      this.joke.set(jk);
+    public void setNumber(String number) {
+      this.number.set(number);
+    }
+    public SimpleStringProperty insultProperty() {
+      return insult;
+    }
+    public String getInsult() {
+      return insult.get();
+    }
+    public void setInsult(String insult) {
+      this.insult.set(insult);
     }
     
   }
@@ -220,4 +230,3 @@ class JSONParsing {
   }
   
 }
-
